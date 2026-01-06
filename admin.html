@@ -1,0 +1,192 @@
+<<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Portal - Sistem Permohonan Alat Tulis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="icon" href="img/UHSB-Logo-resize.png">
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="js/auth.js"></script>
+
+    <script>
+        if (sessionStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = "adminlogin.html";
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'League Spartan', sans-serif;
+            background: linear-gradient(135deg, #1A2350, #1FA2FF);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: auto; }
+        .header {
+            background: #F4F6F8;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+        }
+        h1 { color: #1A2350; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab {
+            flex: 1;
+            padding: 15px;
+            background: rgba(255,255,255,.2);
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+        }
+        .tab.active {
+            background: #F4F6F8;
+            color: #1A2350;
+        }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+
+        .box {
+            background: #F4F6F8;
+            padding: 30px;
+            border-radius: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        th {
+            background: #1A2350;
+            color: white;
+            padding: 12px;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        tr:hover { background: #f5f5f5; }
+
+        .btn {
+            padding: 10px 20px;
+            background: #1FA2FF;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>Admin Portal Sistem Permohonan Alat Tulis & Kenderaan</h1>
+        <p>Dicipta oleh UPSI Holdings Sdn. Bhd.</p>
+        <button class="btn" style="float:right" onclick="logout()">Log Keluar</button>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('form')">Maklumat Borang</div>
+        <div class="tab" onclick="switchTab('record')">Rekod Permohonan</div>
+    </div>
+
+    <!-- INFO BORANG -->
+    <div id="formSection" class="content-section active">
+        <div class="box">
+            <h2>Maklumat Sistem</h2>
+            <p>Sistem ini digunakan untuk merekod permohonan:</p>
+            <ul>
+                <li>Alat Tulis</li>
+                <li>Kenderaan</li>
+                <li>Kertas A4</li>
+            </ul>
+            <br>
+            <p>Semua permohonan akan direkod secara automatik ke dalam sistem.</p>
+        </div>
+    </div>
+
+    <!-- REKOD PERMOHONAN -->
+    <div id="recordSection" class="content-section">
+        <div class="box">
+            <h2>Senarai Rekod Permohonan</h2>
+            <br>
+
+            <table>
+                <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama</th>
+                    <th>Jabatan</th>
+                    <th>Jenis Alatan</th>
+                    <th>Kuantiti</th>
+                    <th>Tempoh</th>
+                    <th>Timestamp</th>
+                </tr>
+                </thead>
+                <tbody id="dataTable">
+                    <tr>
+                        <td colspan="7">Memuatkan data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const RESPONSE_API = "PASTE_RESPONSE_GET_API_HERE";
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.content-section').forEach(c => c.classList.remove('active'));
+
+        if (tab === 'form') {
+            document.querySelectorAll('.tab')[0].classList.add('active');
+            document.getElementById('formSection').classList.add('active');
+        } else {
+            document.querySelectorAll('.tab')[1].classList.add('active');
+            document.getElementById('recordSection').classList.add('active');
+            loadData();
+        }
+    }
+
+    async function loadData() {
+        const tbody = document.getElementById('dataTable');
+        const res = await fetch(RESPONSE_API);
+        const data = await res.json();
+
+        if (!data.length) {
+            tbody.innerHTML = `<tr><td colspan="7">Tiada rekod.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = data.map((r, i) => `
+            <tr>
+                <td>${i+1}</td>
+                <td>${r.Nama}</td>
+                <td>${r.Jabatan}</td>
+                <td>${r['Jenis Alatan']}</td>
+                <td>${r.Kuantiti}</td>
+                <td>${r.Tempoh}</td>
+                <td>${r.Timestamp}</td>
+            </tr>
+        `).join('');
+    }
+
+    function logout() {
+        sessionStorage.clear();
+        window.location.href = "adminlogin.html";
+    }
+</script>
+
+</body>
+</html>

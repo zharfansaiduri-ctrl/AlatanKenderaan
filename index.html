@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="img/UHSB-Logo-resize.png">
+
+  <title>Borang Permohonan Alat Tulis</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#1A2350;
+      --bg2:#1FA2FF;
+      --card:#F4F6F8;
+      --accent:#12D8FA;
+      --muted:#6B7280;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:'League Spartan',sans-serif;
+      background:linear-gradient(135deg,var(--bg1),var(--bg2));
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .box{
+      width:100%;
+      max-width:460px;
+      background:var(--card);
+      padding:32px;
+      border-radius:16px;
+      box-shadow:0 12px 36px rgba(0,0,0,.22);
+    }
+    h1{
+      margin:0;
+      color:var(--bg1);
+      font-size:22px;
+      text-align:center;
+    }
+    .subtitle{
+      text-align:center;
+      font-size:13px;
+      color:var(--muted);
+      margin:8px 0 18px;
+    }
+    .form{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .field{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      background:#fff;
+      border-radius:10px;
+      padding:6px 10px;
+      border:2px solid #e6e9ee;
+      transition:.18s;
+    }
+    .field:focus-within{
+      border-color:var(--bg2);
+      box-shadow:0 6px 16px rgba(31,162,255,.12);
+      transform:translateY(-1px);
+    }
+    .field input, .field select{
+      border:0;
+      outline:none;
+      font-size:15px;
+      padding:10px 6px;
+      width:100%;
+      background:transparent;
+      font-family:inherit;
+    }
+    .icon{
+      width:36px;height:36px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:6px;
+      background:linear-gradient(180deg,#f8fafc,#eef6ff);
+      font-size:14px;
+    }
+    button.submit{
+      margin-top:8px;
+      padding:12px;
+      border-radius:10px;
+      border:0;
+      background:linear-gradient(135deg,var(--bg2),var(--accent));
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+      transition:.18s;
+    }
+    button.submit:hover{transform:translateY(-3px)}
+    .success, .error{
+      display:none;
+      padding:10px 12px;
+      border-radius:8px;
+      font-size:13px;
+      margin-bottom:10px;
+    }
+    .success{background:#ecfdf5;color:#065f46}
+    .error{background:#fff1f0;color:#b91c1c}
+    @media(max-width:420px){
+      .box{padding:20px}
+      .icon{display:none}
+    }
+  </style>
+</head>
+
+<body>
+
+<main class="box">
+  <h1>Borang Permohonan</h1>
+  <div class="subtitle">
+    Sistem Permohonan Alat Tulis & Kenderaan
+  </div>
+
+  <div id="successBox" class="success">
+    Permohonan berjaya dihantar.
+  </div>
+
+  <div id="errorBox" class="error">
+    Ralat menghantar permohonan.
+  </div>
+
+  <form class="form" onsubmit="event.preventDefault(); submitForm();">
+
+    <div class="field">
+      <div class="icon">👤</div>
+      <input id="nama" placeholder="Nama" required>
+    </div>
+
+    <div class="field">
+      <div class="icon">🏢</div>
+      <input id="jabatan" placeholder="Jabatan" required>
+    </div>
+
+    <div class="field">
+      <div class="icon">📦</div>
+      <select id="jenis">
+        <option value="">Pilih Jenis Alatan</option>
+        <option>Alat Tulis</option>
+        <option>Kenderaan</option>
+        <option>Kertas A4</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <div class="icon">🔢</div>
+      <input id="kuantiti" type="number" min="1" placeholder="Kuantiti" required>
+    </div>
+
+    <div class="field">
+      <div class="icon">⏱️</div>
+      <input id="tempoh" placeholder="Tempoh (cth: 6 bulan / Sekali guna)">
+    </div>
+
+    <button class="submit" type="submit">Hantar Permohonan</button>
+
+  </form>
+</main>
+
+<script>
+  const POST_API = "PASTE_RESPONSE_POST_API_HERE";
+
+  async function submitForm(){
+    const data = {
+      Nama: document.getElementById('nama').value,
+      Jabatan: document.getElementById('jabatan').value,
+      Jenis_Alatan: document.getElementById('jenis').value,
+      Kuantiti: document.getElementById('kuantiti').value,
+      Tempoh: document.getElementById('tempoh').value
+    };
+
+    document.getElementById('successBox').style.display = 'none';
+    document.getElementById('errorBox').style.display = 'none';
+
+    try{
+      const res = await fetch(POST_API,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+
+      if(result.status === 'success'){
+        document.getElementById('successBox').style.display = 'block';
+        document.querySelector('form').reset();
+      } else {
+        throw new Error(result.message);
+      }
+    }catch(err){
+      document.getElementById('errorBox').style.display = 'block';
+    }
+  }
+</script>
+
+</body>
+</html>

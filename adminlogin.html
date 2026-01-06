@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="img/UHSB-Logo-resize.png">
+  <title>Log Masuk - Admin Alat Tulis</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#1A2350;
+      --bg2:#1FA2FF;
+      --card:#F4F6F8;
+      --accent:#12D8FA;
+      --muted:#6B7280;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:'League Spartan',sans-serif;
+      background:linear-gradient(135deg,var(--bg1),var(--bg2));
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .login-box{
+      width:100%;
+      max-width:420px;
+      background:var(--card);
+      padding:32px;
+      border-radius:16px;
+      box-shadow:0 12px 36px rgba(0,0,0,.22);
+    }
+    .brand{text-align:center;margin-bottom:18px}
+    .brand h1{
+      margin:0;
+      color:var(--bg1);
+      font-size:22px;
+    }
+    .subtitle{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:6px;
+    }
+    .form{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin-top:10px;
+    }
+    .field{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      background:#fff;
+      border-radius:10px;
+      padding:6px 10px;
+      border:2px solid #e6e9ee;
+      transition:.18s;
+    }
+    .field:focus-within{
+      border-color:var(--bg2);
+      box-shadow:0 6px 16px rgba(31,162,255,.12);
+      transform:translateY(-1px);
+    }
+    .field input{
+      border:0;
+      outline:none;
+      font-size:15px;
+      padding:10px 6px;
+      width:100%;
+      background:transparent;
+      font-family:inherit;
+    }
+    .icon{
+      width:36px;height:36px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:6px;
+      background:linear-gradient(180deg,#f8fafc,#eef6ff);
+      font-size:14px;
+    }
+    .pw-toggle{
+      background:transparent;
+      border:0;
+      cursor:pointer;
+      font-size:13px;
+      color:var(--muted);
+      padding:6px;
+    }
+    .login-actions{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:6px;
+    }
+    button.submit{
+      padding:12px;
+      border-radius:10px;
+      border:0;
+      background:linear-gradient(135deg,var(--bg2),var(--accent));
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+      transition:.18s;
+    }
+    button.submit:hover{transform:translateY(-3px)}
+    .error{
+      display:none;
+      background:#fff1f0;
+      color:#b91c1c;
+      padding:10px 12px;
+      border-radius:8px;
+      font-size:13px;
+      margin-bottom:8px;
+    }
+    .meta{
+      display:flex;
+      justify-content:space-between;
+      font-size:13px;
+      color:var(--muted);
+    }
+    @media(max-width:420px){
+      .login-box{padding:20px}
+      .icon{display:none}
+    }
+  </style>
+</head>
+
+<body>
+
+<main class="login-box">
+  <div class="brand">
+    <h1>Admin Portal Alat Tulis & Kenderaan</h1>
+    <div class="subtitle">
+      Sila log masuk untuk mengurus permohonan
+    </div>
+  </div>
+
+  <div id="errorBox" class="error">
+    Nama pengguna atau kata laluan salah.
+  </div>
+
+  <form class="form" onsubmit="event.preventDefault(); login();">
+    <div class="field">
+      <div class="icon">👤</div>
+      <input id="username" type="text" placeholder="Nama Pengguna" required autofocus>
+    </div>
+
+    <div class="field">
+      <div class="icon">🔒</div>
+      <input id="password" type="password" placeholder="Kata Laluan" required>
+      <button type="button" class="pw-toggle" id="togglePw">Tunjuk</button>
+    </div>
+
+    <div class="login-actions">
+      <div class="meta">
+        <span>Log masuk selamat</span>
+        <span>v1.0</span>
+      </div>
+      <button class="submit" type="submit">Log Masuk</button>
+    </div>
+  </form>
+</main>
+
+<script src="js/auth.js"></script>
+
+<script>
+  const pw = document.getElementById('password');
+  const toggle = document.getElementById('togglePw');
+
+  toggle.addEventListener('click', () => {
+    const show = pw.type === 'password';
+    pw.type = show ? 'text' : 'password';
+    toggle.textContent = show ? 'Sembunyi' : 'Tunjuk';
+  });
+
+  if (sessionStorage.getItem('isLoggedIn') === 'true') {
+    window.location.href = "admin.html";
+  }
+</script>
+
+</body>
+</html>

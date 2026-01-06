@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="img/UHSB-Logo-resize.png">    
+
+  <title>Admin Portal - Alat Tulis</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+  <script src="js/auth.js"></script>
+  <script>
+    if (sessionStorage.getItem('isLoggedIn') !== 'true') {
+      window.location.href = "adminlogin.html";
+    }
+  </script>
+
+  <style>
+    body{
+      font-family:'League Spartan',sans-serif;
+      background:linear-gradient(135deg,#1A2350,#1FA2FF);
+      min-height:100vh;
+      padding:20px;
+    }
+    .container{max-width:1200px;margin:auto}
+    .header{
+      background:#F4F6F8;
+      padding:30px;
+      border-radius:20px;
+      margin-bottom:30px;
+      box-shadow:0 10px 30px rgba(0,0,0,.2)
+    }
+    h1{color:#1A2350;font-size:32px}
+    .subtitle{color:#4A4A4A}
+    .refresh-btn{
+      padding:10px 20px;
+      background:#1FA2FF;
+      color:white;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+      float:right;
+    }
+    .content{
+      background:#F4F6F8;
+      padding:30px;
+      border-radius:20px;
+      box-shadow:0 10px 30px rgba(0,0,0,.2)
+    }
+    .filter-bar{
+      display:flex;
+      gap:15px;
+      margin-bottom:20px;
+      flex-wrap:wrap;
+    }
+    .filter-bar select,.filter-bar input{
+      padding:12px;
+      border-radius:10px;
+      border:2px solid #a0a0a0;
+      font-size:16px;
+      flex:1;
+      min-width:200px;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      background:white;
+      border-radius:12px;
+      overflow:hidden;
+    }
+    th,td{
+      padding:15px;
+      border-bottom:1px solid #e0e0e0;
+    }
+    th{
+      background:#1A2350;
+      color:white;
+    }
+    tr:hover{background:#f8f9fa}
+    .pdf-btn{
+      margin-bottom:15px;
+      padding:12px 24px;
+      background:linear-gradient(135deg,#d32f2f,#f44336);
+      color:white;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      float:right;
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>Admin Portal Sistem Permohonan</h1>
+    <p class="subtitle">Sistem Permohonan Alat Tulis & Kenderaan</p>
+    <button class="refresh-btn" onclick="logout()">Log Keluar</button>
+  </div>
+
+  <div class="content">
+    <div class="filter-bar">
+      <select id="jenisFilter" onchange="filterData()">
+        <option value="">Semua Alatan</option>
+        <option>Alat Tulis</option>
+        <option>Kenderaan</option>
+        <option>Kertas A4</option>
+      </select>
+
+      <input id="searchInput" placeholder="Cari nama atau jabatan..." onkeyup="filterData()">
+      <button class="refresh-btn" onclick="loadData()">Muat Semula</button>
+    </div>
+
+    <button class="pdf-btn" onclick="downloadPDF()">📄 Muat Turun PDF</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama</th>
+          <th>Jabatan</th>
+          <th>Jenis Alatan</th>
+          <th>Kuantiti</th>
+          <th>Tempoh</th>
+          <th>Tarikh</th>
+        </tr>
+      </thead>
+      <tbody id="tableData">
+        <tr><td colspan="7">Memuatkan data...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const API = "PASTE_RESPONSE_GET_API_HERE";
+let allData = [];
+let filteredData = [];
+
+async function loadData(){
+  const tbody = document.getElementById('tableData');
+  tbody.innerHTML = '<tr><td colspan="7">Memuatkan data...</td></tr>';
+
+  try{
+    const res = await fetch(API);
+    const data = await res.json();
+    allData = data;
+    filteredData = data;
+    displayData(data);
+  }catch{
+    tbody.innerHTML = '<tr><td colspan="7">Gagal memuat data</td></tr>';
+  }
+}
+
+function displayData(data){
+  const tbody = document.getElementById('tableData');
+  if(data.length === 0){
+    tbody.innerHTML = '<tr><td colspan="7">Tiada rekod</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map((r,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${r.Nama||'-'}</td>
+      <td>${r.Jabatan||'-'}</td>
+      <td>${r.Jenis_Alatan||'-'}</td>
+      <td>${r.Kuantiti||'-'}</td>
+      <td>${r.Tempoh||'-'}</td>
+      <td>${r.Timestamp ? new Date(r.Timestamp).toLocaleString('ms-MY') : '-'}</td>
+    </tr>
+  `).join('');
+}
+
+function filterData(){
+  const jenis = document.getElementById('jenisFilter').value;
+  const search = document.getElementById('searchInput').value.toLowerCase();
+
+  let data = [...allData];
+  if(jenis) data = data.filter(r => r.Jenis_Alatan === jenis);
+  if(search){
+    data = data.filter(r =>
+      (r.Nama||'').toLowerCase().includes(search) ||
+      (r.Jabatan||'').toLowerCase().includes(search)
+    );
+  }
+  filteredData = data;
+  displayData(data);
+}
+
+function downloadPDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.text("Laporan Permohonan Alat Tulis", 14, 15);
+
+  const rows = filteredData.map((r,i)=>[
+    i+1,
+    r.Nama,
+    r.Jabatan,
+    r.Jenis_Alatan,
+    r.Kuantiti,
+    r.Tempoh,
+    r.Timestamp
+  ]);
+
+  doc.autoTable({
+    startY:20,
+    head:[['No','Nama','Jabatan','Alatan','Qty','Tempoh','Tarikh']],
+    body:rows
+  });
+
+  doc.save("Laporan_Alat_Tulis.pdf");
+}
+
+function logout(){
+  sessionStorage.clear();
+  window.location.href="adminlogin.html";
+}
+
+document.addEventListener('DOMContentLoaded', loadData);
+</script>
+
+</body>
+</html>
